@@ -1,6 +1,7 @@
-import type { UserConfig } from '@commitlint/types';
+// @ts-check
 
-const config: UserConfig = {
+/** @type {import('@commitlint/types').UserConfig} */
+const config = {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'scope-enum': [
