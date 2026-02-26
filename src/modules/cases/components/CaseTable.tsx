@@ -1,34 +1,11 @@
+import type { BadgeProps } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
+import { APP_ROUTES } from '@/lib/routes/app-routes';
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { APP_ROUTES } from '@/lib/routes/app-routes';
-import type { Case, CasePriority, CaseStatus } from '../types';
-import type { BadgeProps } from '@/components/ui/badge';
-
-const STATUS_LABELS: Record<CaseStatus, string> = {
-  open: 'Open',
-  in_progress: 'In Progress',
-  pending_review: 'Pending Review',
-  resolved: 'Resolved',
-  closed: 'Closed',
-};
-
-const PRIORITY_LABELS: Record<CasePriority, string> = {
-  urgent: 'Urgent',
-  high: 'High',
-  normal: 'Normal',
-  low: 'Low',
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  initial_consult: 'Initial Consult',
-  follow_up: 'Follow-Up',
-  lab_review: 'Lab Review',
-  prescription_refill: 'Rx Refill',
-  referral: 'Referral',
-  general: 'General',
-};
+import type { Case, CaseStatus } from '../types';
+import { PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from '../utils/constants';
 
 function DueDateCell({ dueDate, status }: { dueDate: string | null; status: CaseStatus }) {
   if (!dueDate) return <span className='text-slate-400'>—</span>;

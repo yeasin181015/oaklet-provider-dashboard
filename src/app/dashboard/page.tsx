@@ -28,13 +28,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const filters: CaseFilters = {
-    practice_id: params.practice_id || undefined,
-    status: (params.status as CaseStatus) || undefined,
-    priority: (params.priority as CasePriority) || undefined,
-    search: params.search || undefined,
-    sort_by: (params.sort_by as SortField) || 'updated_at',
-    sort_order: (params.sort_order as SortOrder) || 'desc',
-    page: params.page ? parseInt(params.page, 10) : 1,
+    practice_id: params.practice_id ?? undefined,
+    status: params.status as CaseStatus | undefined,
+    priority: params.priority as CasePriority | undefined,
+    search: params.search ?? undefined,
+    sort_by: (params.sort_by as SortField) ?? 'updated_at',
+    sort_order: (params.sort_order as SortOrder) ?? 'desc',
+    page: Number(params.page) || 1,
     per_page: 25,
   };
 
@@ -64,7 +64,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   );
 }
 
-async function CasesHeading({ casesPromise }: { casesPromise: Promise<Awaited<ReturnType<typeof casesService.list>>> }) {
+async function CasesHeading({
+  casesPromise,
+}: {
+  casesPromise: Promise<Awaited<ReturnType<typeof casesService.list>>>;
+}) {
   const data = await casesPromise;
   return (
     <h2 className='text-lg font-semibold text-slate-900'>

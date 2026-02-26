@@ -8,33 +8,7 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-
-const STATUS_OPTIONS = [
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'pending_review', label: 'Pending Review' },
-  { value: 'resolved', label: 'Resolved' },
-  { value: 'closed', label: 'Closed' },
-];
-
-const PRIORITY_OPTIONS = [
-  { value: 'urgent', label: 'Urgent' },
-  { value: 'high', label: 'High' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'low', label: 'Low' },
-];
-
-const SORT_OPTIONS = [
-  { value: 'updated_at', label: 'Last Updated' },
-  { value: 'due_date', label: 'Due Date' },
-  { value: 'priority', label: 'Priority' },
-  { value: 'created_at', label: 'Created' },
-];
-
-const SORT_ORDER_OPTIONS = [
-  { value: 'desc', label: '↓ Newest first' },
-  { value: 'asc', label: '↑ Oldest first' },
-];
+import { PRIORITY_OPTIONS, SORT_OPTIONS, SORT_ORDER_OPTIONS, STATUS_OPTIONS } from '../utils/constants';
 
 interface CaseFiltersUrlProps {
   practices: Practice[];

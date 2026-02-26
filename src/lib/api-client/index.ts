@@ -11,9 +11,21 @@ const PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? '/api';
 const VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? '/v1';
 const TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT ?? 30_000);
 
-function buildUrl(path: string): string {
+// Any plain object can be used as query params — values are coerced to strings.
+type Params = object;
+
+function buildUrl(path: string, params?: Params): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${BASE_URL}${PREFIX}${VERSION}${normalizedPath}`;
+  const base = `${BASE_URL}${PREFIX}${VERSION}${normalizedPath}`;
+
+  if (!params) return base;
+
+  const qs = Object.entries(params as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+    .join('&');
+
+  return qs ? `${base}?${qs}` : base;
 }
 
 async function getAuthHeader(): Promise<Record<string, string>> {
@@ -48,11 +60,12 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
+  params?: Params;
   token?: string; // For server-side calls where getSession isn't available
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { body, token, ...rest } = options;
+  const { body, params, token, ...rest } = options;
 
   const authHeader = token ? { Authorization: `Bearer ${token}` } : await getAuthHeader();
 
@@ -60,7 +73,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const timer = setTimeout(() => controller.abort(), TIMEOUT);
 
   try {
-    const res = await fetch(buildUrl(path), {
+    const res = await fetch(buildUrl(path, params), {
       ...rest,
       headers: {
         'Content-Type': 'application/json',
@@ -103,8 +116,8 @@ export class ApiClientError extends Error {
 }
 
 export const apiClient = {
-  get<T>(path: string, options?: Omit<RequestOptions, 'body' | 'method'>) {
-    return request<T>(path, { ...options, method: 'GET' });
+  get<T>(path: string, params?: Params, options?: Omit<RequestOptions, 'body' | 'method' | 'params'>) {
+    return request<T>(path, { ...options, params, method: 'GET' });
   },
 
   post<T>(path: string, body: unknown, options?: Omit<RequestOptions, 'body' | 'method'>) {
