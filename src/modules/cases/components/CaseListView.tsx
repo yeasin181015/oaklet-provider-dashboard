@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { SummaryCards } from './SummaryCards';
+import { useCallback, useState } from 'react';
+import { useCases } from '../hooks/useCases';
+import type { CaseFilters as CaseFiltersType } from '../types';
 import { CaseFilters } from './CaseFilters';
 import { CaseTable } from './CaseTable';
 import { Pagination } from './Pagination';
-import { useCases } from '../hooks/useCases';
-import type { CaseFilters as CaseFiltersType } from '../types';
+import { SummaryCards } from './SummaryCards';
 
 export function CaseListView() {
   const [filters, setFilters] = useState<CaseFiltersType>({

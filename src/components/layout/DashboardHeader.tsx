@@ -1,14 +1,15 @@
 'use client';
 
-import { signOut, useSession } from 'next-auth/react';
-import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/routes/app-routes';
+import { LogOut, User } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 
 export function DashboardHeader() {
   const { data: session } = useSession();
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' });
+    await signOut({ callbackUrl: APP_ROUTES.auth.login });
   };
 
   const displayName = session?.user
