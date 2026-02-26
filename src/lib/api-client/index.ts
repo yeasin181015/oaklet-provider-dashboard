@@ -17,8 +17,23 @@ function buildUrl(path: string): string {
 }
 
 async function getAuthHeader(): Promise<Record<string, string>> {
-  // next-auth/react is browser-only; dynamic import prevents server-side crashes.
-  if (typeof window === 'undefined') return {};
+  if (typeof window === 'undefined') {
+    // Server-side: use auth() from the NextAuth config.
+    // Dynamic import breaks the potential circular dep at module-init time.
+    // During the authorize() callback auth() returns null — correct, login needs no token.
+    try {
+      const { auth } = await import('@/auth');
+      const session = await auth();
+      if (session?.accessToken) {
+        return { Authorization: `Bearer ${session.accessToken}` };
+      }
+    } catch {
+      // auth not resolvable in this context (e.g. during authorize callback)
+    }
+    return {};
+  }
+
+  // Client-side: next-auth/react is browser-only.
   try {
     const { getSession } = await import('next-auth/react');
     const session = await getSession();

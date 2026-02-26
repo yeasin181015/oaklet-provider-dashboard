@@ -1,15 +1,10 @@
-'use client';
-
 import { format, isPast, isToday, parseISO } from 'date-fns';
-import { MessageSquare, AlertCircle, ChevronRight } from 'lucide-react';
+import { ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Spinner } from '@/components/ui/spinner';
 import { APP_ROUTES } from '@/lib/routes/app-routes';
 import type { Case, CasePriority, CaseStatus } from '../types';
 import type { BadgeProps } from '@/components/ui/badge';
-
-// ─── Label helpers ────────────────────────────────────────────────────────────
 
 const STATUS_LABELS: Record<CaseStatus, string> = {
   open: 'Open',
@@ -35,8 +30,6 @@ const TYPE_LABELS: Record<string, string> = {
   general: 'General',
 };
 
-// ─── Due date display ─────────────────────────────────────────────────────────
-
 function DueDateCell({ dueDate, status }: { dueDate: string | null; status: CaseStatus }) {
   if (!dueDate) return <span className='text-slate-400'>—</span>;
 
@@ -46,16 +39,12 @@ function DueDateCell({ dueDate, status }: { dueDate: string | null; status: Case
   const dueToday = !isResolved && isToday(date);
 
   return (
-    <span
-      className={`text-sm ${overdue ? 'font-semibold text-red-600' : dueToday ? 'font-semibold text-orange-600' : 'text-slate-600'}`}
-    >
+    <span className={`text-sm ${overdue ? 'font-semibold text-red-600' : dueToday ? 'font-semibold text-orange-600' : 'text-slate-600'}`}>
       {overdue && <span className='mr-1'>⚠</span>}
       {format(date, 'MMM d, yyyy')}
     </span>
   );
 }
-
-// ─── Table row ────────────────────────────────────────────────────────────────
 
 function CaseRow({ c }: { c: Case }) {
   const patientName = `${c.patient.first_name} ${c.patient.last_name}`;
@@ -63,28 +52,21 @@ function CaseRow({ c }: { c: Case }) {
 
   return (
     <tr className='group border-b border-slate-100 transition-colors hover:bg-slate-50'>
-      {/* Patient */}
       <td className='py-3 pl-4 pr-3'>
         <div className='font-medium text-slate-900'>{patientName}</div>
         <div className='text-xs text-slate-400'>{c.patient.mrn}</div>
       </td>
-      {/* Practice */}
       <td className='hidden px-3 py-3 text-sm text-slate-600 md:table-cell'>{c.practice_name}</td>
-      {/* Type */}
       <td className='hidden px-3 py-3 text-sm text-slate-600 lg:table-cell'>{TYPE_LABELS[c.type] ?? c.type}</td>
-      {/* Status */}
       <td className='px-3 py-3'>
         <Badge variant={c.status as BadgeProps['variant']}>{STATUS_LABELS[c.status]}</Badge>
       </td>
-      {/* Priority */}
       <td className='hidden px-3 py-3 sm:table-cell'>
         <Badge variant={c.priority as BadgeProps['variant']}>{PRIORITY_LABELS[c.priority]}</Badge>
       </td>
-      {/* Due date */}
       <td className='hidden px-3 py-3 md:table-cell'>
         <DueDateCell dueDate={c.due_date} status={c.status} />
       </td>
-      {/* Messages */}
       <td className='px-3 py-3 text-center'>
         {c.unread_messages > 0 && !isResolved ? (
           <span className='inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700'>
@@ -95,7 +77,6 @@ function CaseRow({ c }: { c: Case }) {
           <span className='text-slate-300'>—</span>
         )}
       </td>
-      {/* Action */}
       <td className='py-3 pl-3 pr-4 text-right'>
         <Link
           href={APP_ROUTES.cases.detail(c.id)}
@@ -109,36 +90,10 @@ function CaseRow({ c }: { c: Case }) {
   );
 }
 
-// ─── Table ────────────────────────────────────────────────────────────────────
-
-interface CaseTableProps {
-  cases: Case[];
-  isLoading?: boolean;
-  isError?: boolean;
-}
-
-export function CaseTable({ cases, isLoading, isError }: CaseTableProps) {
-  if (isLoading) {
-    return (
-      <div className='flex h-48 items-center justify-center'>
-        <Spinner size='lg' />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className='flex h-48 flex-col items-center justify-center gap-2 text-slate-500'>
-        <AlertCircle className='h-8 w-8 text-red-400' />
-        <p className='font-medium'>Failed to load cases</p>
-        <p className='text-sm'>Please refresh the page and try again.</p>
-      </div>
-    );
-  }
-
+export function CaseTable({ cases }: { cases: Case[] }) {
   if (cases.length === 0) {
     return (
-      <div className='flex h-48 flex-col items-center justify-center gap-2 text-slate-500'>
+      <div className='flex h-48 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-500'>
         <p className='font-medium'>No cases found</p>
         <p className='text-sm'>Try adjusting your filters.</p>
       </div>
@@ -166,6 +121,17 @@ export function CaseTable({ cases, isLoading, isError }: CaseTableProps) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+export function CaseTableSkeleton() {
+  return (
+    <div className='space-y-2'>
+      <div className='h-10 animate-pulse rounded-lg bg-slate-100' />
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className='h-14 animate-pulse rounded-lg bg-slate-50' />
+      ))}
     </div>
   );
 }
