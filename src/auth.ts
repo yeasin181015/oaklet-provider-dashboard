@@ -58,13 +58,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      session.user.id = token.userId;
-      session.user.firstName = token.firstName;
-      session.user.lastName = token.lastName;
-      session.user.role = token.role;
-      session.user.practices = token.practices;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = token as any;
+      session.accessToken = t.accessToken as string;
+      session.refreshToken = t.refreshToken as string;
+      session.user.id = t.userId as string;
+      session.user.firstName = t.firstName as string;
+      session.user.lastName = t.lastName as string;
+      session.user.role = t.role as string;
+      session.user.practices = t.practices;
       return session;
     },
   },
