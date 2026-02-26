@@ -1,47 +1,27 @@
 'use client';
 
-import { format, parseISO } from 'date-fns';
-import { ArrowLeft, MessageSquare, Calendar, User, Building2 } from 'lucide-react';
-import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { Spinner } from '@/components/ui/spinner';
-import { APP_ROUTES } from '@/lib/routes/app-routes';
-import { useCaseDetail } from '../hooks/useCases';
 import type { BadgeProps } from '@/components/ui/badge';
-import type { CasePriority, CaseStatus } from '../types';
-
-const STATUS_LABELS: Record<CaseStatus, string> = {
-  open: 'Open',
-  in_progress: 'In Progress',
-  pending_review: 'Pending Review',
-  resolved: 'Resolved',
-  closed: 'Closed',
-};
-
-const PRIORITY_LABELS: Record<CasePriority, string> = {
-  urgent: 'Urgent',
-  high: 'High',
-  normal: 'Normal',
-  low: 'Low',
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  initial_consult: 'Initial Consult',
-  follow_up: 'Follow-Up',
-  lab_review: 'Lab Review',
-  prescription_refill: 'Prescription Refill',
-  referral: 'Referral',
-  general: 'General',
-};
+import { Badge } from '@/components/ui/badge';
+import { APP_ROUTES } from '@/lib/routes/app-routes';
+import { format, parseISO } from 'date-fns';
+import { ArrowLeft, Building2, Calendar, MessageSquare, User } from 'lucide-react';
+import Link from 'next/link';
+import { useCaseDetail } from '../hooks/useCases';
+import { PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from '../utils/constants';
 
 function TimelineEventIcon({ type }: { type: string }) {
   const base = 'h-2 w-2 rounded-full mt-1.5 shrink-0';
   switch (type) {
-    case 'case_created': return <span className={`${base} bg-blue-500`} />;
-    case 'message': return <span className={`${base} bg-purple-500`} />;
-    case 'note_added': return <span className={`${base} bg-green-500`} />;
-    case 'status_changed': return <span className={`${base} bg-yellow-500`} />;
-    default: return <span className={`${base} bg-slate-400`} />;
+    case 'case_created':
+      return <span className={`${base} bg-blue-500`} />;
+    case 'message':
+      return <span className={`${base} bg-purple-500`} />;
+    case 'note_added':
+      return <span className={`${base} bg-green-500`} />;
+    case 'status_changed':
+      return <span className={`${base} bg-yellow-500`} />;
+    default:
+      return <span className={`${base} bg-slate-400`} />;
   }
 }
 
@@ -53,11 +33,7 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
   const { data: caseDetail, isLoading, isError } = useCaseDetail(caseId);
 
   if (isLoading) {
-    return (
-      <div className='flex h-64 items-center justify-center'>
-        <Spinner size='lg' />
-      </div>
-    );
+    return <CaseDetailSkeleton />;
   }
 
   if (isError || !caseDetail) {
@@ -104,7 +80,7 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
         {/* Metadata grid */}
         <div className='mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-4'>
           <div className='space-y-1'>
-            <p className='text-xs font-medium uppercase tracking-wide text-slate-400'>Patient</p>
+            <p className='text-xs font-medium tracking-wide text-slate-400 uppercase'>Patient</p>
             <div className='flex items-center gap-1.5 text-sm text-slate-700'>
               <User className='h-3.5 w-3.5 text-slate-400' />
               {patientName}
@@ -112,18 +88,18 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
             <p className='text-xs text-slate-400'>{caseDetail.patient.mrn}</p>
           </div>
           <div className='space-y-1'>
-            <p className='text-xs font-medium uppercase tracking-wide text-slate-400'>Practice</p>
+            <p className='text-xs font-medium tracking-wide text-slate-400 uppercase'>Practice</p>
             <div className='flex items-center gap-1.5 text-sm text-slate-700'>
               <Building2 className='h-3.5 w-3.5 text-slate-400' />
               {caseDetail.practice_name}
             </div>
           </div>
           <div className='space-y-1'>
-            <p className='text-xs font-medium uppercase tracking-wide text-slate-400'>Type</p>
+            <p className='text-xs font-medium tracking-wide text-slate-400 uppercase'>Type</p>
             <p className='text-sm text-slate-700'>{TYPE_LABELS[caseDetail.type] ?? caseDetail.type}</p>
           </div>
           <div className='space-y-1'>
-            <p className='text-xs font-medium uppercase tracking-wide text-slate-400'>Due Date</p>
+            <p className='text-xs font-medium tracking-wide text-slate-400 uppercase'>Due Date</p>
             <div className='flex items-center gap-1.5 text-sm text-slate-700'>
               <Calendar className='h-3.5 w-3.5 text-slate-400' />
               {caseDetail.due_date ? format(parseISO(caseDetail.due_date), 'MMM d, yyyy') : '—'}
@@ -158,6 +134,31 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function CaseDetailSkeleton() {
+  return (
+    <div className='animate-pulse space-y-6'>
+      {/* Back link */}
+      <div className='h-4 w-32 rounded bg-slate-200'></div>
+
+      {/* Header card */}
+      <div className='space-y-4 rounded-xl border border-slate-200 bg-white p-6'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+          <div className='space-y-2'>
+            <div className='h-6 w-40 rounded bg-slate-200'></div>
+            <div className='h-4 w-20 rounded bg-slate-200'></div>
+          </div>
+          <div className='flex gap-2'>
+            <div className='h-5 w-12 rounded bg-slate-200'></div>
+            <div className='h-5 w-12 rounded bg-slate-200'></div>
+          </div>
+        </div>
+
+        <div className='h-16 rounded bg-slate-200'></div>
+      </div>
     </div>
   );
 }

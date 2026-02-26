@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
-import { NextResponse } from 'next/server';
 import { APP_ROUTES } from '@/lib/routes/app-routes';
+import { NextResponse } from 'next/server';
 
 const PUBLIC_PATHS = [APP_ROUTES.auth.login, '/api/auth'];
 
@@ -11,7 +11,6 @@ export default auth((req) => {
   const isApiRoute = pathname.startsWith('/api/');
   const isAuthenticated = !!req.auth;
 
-  // Allow public paths and internal API routes
   if (isPublic || isApiRoute) return NextResponse.next();
 
   // Redirect unauthenticated users to login
