@@ -1,23 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { APP_ROUTES } from '@/lib/routes/app-routes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { loginSchema, type LoginFormValues } from '../validations';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') ?? APP_ROUTES.dashboard;
 
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -28,7 +29,6 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    setServerError(null);
     try {
       const result = await signIn('credentials', {
         email: values.email,
@@ -37,26 +37,19 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setServerError('The email or password provided is incorrect.');
+        toast.error((result as { code?: string }).code ?? 'Sign in failed. Please try again.');
         return;
       }
 
       router.push(callbackUrl);
       router.refresh();
-    } catch {
-      setServerError('An unexpected error occurred. Please try again.');
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-4' noValidate>
-      {serverError && (
-        <div className='flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700'>
-          <AlertCircle className='mt-0.5 h-4 w-4 shrink-0' />
-          <span>{serverError}</span>
-        </div>
-      )}
-
       <div className='space-y-1.5'>
         <Label htmlFor='email'>Email address</Label>
         <Input
@@ -84,7 +77,7 @@ export function LoginForm() {
           />
           <button
             type='button'
-            className='absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600'
+            className='absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600'
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >

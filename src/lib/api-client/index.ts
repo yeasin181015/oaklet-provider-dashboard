@@ -6,8 +6,6 @@
  * the rest of the application requires zero changes.
  */
 
-import { getSession } from 'next-auth/react';
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
 const PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? '/api';
 const VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? '/v1';
@@ -19,14 +17,16 @@ function buildUrl(path: string): string {
 }
 
 async function getAuthHeader(): Promise<Record<string, string>> {
-  // Works on the client side; for server-side calls pass the token directly.
+  // next-auth/react is browser-only; dynamic import prevents server-side crashes.
+  if (typeof window === 'undefined') return {};
   try {
+    const { getSession } = await import('next-auth/react');
     const session = await getSession();
     if (session?.accessToken) {
       return { Authorization: `Bearer ${session.accessToken}` };
     }
   } catch {
-    // Called server-side where getSession isn't available — caller must pass token
+    // No session available
   }
   return {};
 }

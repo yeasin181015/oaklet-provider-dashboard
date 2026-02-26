@@ -2,7 +2,6 @@ import { auth } from '@/auth';
 import { APP_ROUTES } from '@/lib/routes/app-routes';
 import { LoginForm } from '@/modules/authentication/components/LoginForm';
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
 
 export const metadata = { title: 'Sign In — Oaklet Provider Dashboard' };
 
@@ -23,9 +22,7 @@ export default async function LoginPage() {
 
         <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
           <h2 className='mb-4 text-lg font-semibold text-slate-900'>Sign in to your account</h2>
-          <Suspense>
             <LoginForm />
-          </Suspense>
         </div>
 
         <p className='mt-4 text-center text-xs text-slate-400'>

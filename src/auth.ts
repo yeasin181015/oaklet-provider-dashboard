@@ -1,6 +1,15 @@
-import NextAuth from 'next-auth';
+import NextAuth, { CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import type { LoginResponse } from './modules/authentication/types';
+import { ApiClientError } from './lib/api-client';
+import { authService } from './modules/authentication/services/service';
+import { LoginFormValues } from './modules/authentication/validations';
+
+class LoginError extends CredentialsSignin {
+  constructor(message: string) {
+    super();
+    this.code = message;
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -14,18 +23,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          });
+          const payload = {
+            email: credentials.email as string,
+            password: credentials.password as string,
+          } as LoginFormValues;
 
-          if (!res.ok) return null;
-
-          const data: LoginResponse = await res.json();
+          const data = await authService.login(payload);
 
           return {
             id: data.provider.id,
@@ -38,7 +41,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
           };
-        } catch {
+        } catch (err) {
+          if (err instanceof ApiClientError) {
+            throw new LoginError(err.message);
+          }
           return null;
         }
       },
